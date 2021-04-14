@@ -1,0 +1,84 @@
+ic | Method: output/ssl_knapPI_1_500_1000_1
+{"n": 500, "weight": 2542.0, "value": 19052.0, "capacity": 2543.0, "optimum": 28857.0}
+ic | VALID SOLUTION |  Execution time: 1.070643663406372  |  Accuracy: 66.02210902034167 
+
+ic | Method: output/ils_knapPI_1_500_1000_1
+ic | Number of iterations: 10
+{"n": 500, "weight": 2543.0, "value": 27693.0, "capacity": 2543.0, "optimum": 28857.0}
+ic | VALID SOLUTION |  Execution time: 2.131587505340576  |  Accuracy: 95.96631666493398 
+
+ic | Method: output/msl_knapPI_1_500_1000_1
+ic | Number of iterations: 10
+{"n": 500, "weight": 2536.0, "value": 22777.0, "capacity": 2543.0, "optimum": 28857.0}
+ic | VALID SOLUTION |  Execution time: 5.216536998748779  |  Accuracy: 78.93058876529092 
+
+ic | Method: output/ssl_knapPI_1_500_1000_1
+{"n": 500, "weight": 2541.0, "value": 20824.0, "capacity": 2543.0, "optimum": 28857.0}
+ic | VALID SOLUTION |  Execution time: 0.9629306793212891  |  Accuracy: 72.16273347887861 
+
+ic | Method: output/ils_knapPI_1_500_1000_1
+ic | Number of iterations: 20
+{"n": 500, "weight": 2538.0, "value": 28419.0, "capacity": 2543.0, "optimum": 28857.0}
+ic | VALID SOLUTION |  Execution time: 4.024722337722778  |  Accuracy: 98.48217070381537 
+
+ic | Method: output/msl_knapPI_1_500_1000_1
+ic | Number of iterations: 20
+{"n": 500, "weight": 2536.0, "value": 22777.0, "capacity": 2543.0, "optimum": 28857.0}
+ic | VALID SOLUTION |  Execution time: 9.794132709503174  |  Accuracy: 78.93058876529092 
+
+ic | Method: output/ssl_knapPI_3_500_1000_1
+{"n": 500, "weight": 2517.0, "value": 3517.0, "capacity": 2517.0, "optimum": 7117.0}
+ic | VALID SOLUTION |  Execution time: 0.3011946678161621  |  Accuracy: 49.41688913868203 
+
+ic | Method: output/msl_knapPI_3_500_1000_1
+ic | Number of iterations: 20
+{"n": 500, "weight": 2517.0, "value": 3717.0, "capacity": 2517.0, "optimum": 7117.0}
+ic | VALID SOLUTION |  Execution time: 1.805211067199707  |  Accuracy: 52.227061964310806 
+
+ic | Method: output/ils_knapPI_3_500_1000_1
+ic | Number of iterations: 20
+{"n": 500, "weight": 2517.0, "value": 5217.0, "capacity": 2517.0, "optimum": 7117.0}
+ic | VALID SOLUTION |  Execution time: 1.8835234642028809  |  Accuracy: 73.30335815652663 
+
+ic | Method: output/ssl_knapPI_3_500_1000_1
+{"n": 500, "weight": 2517.0, "value": 3217.0, "capacity": 2517.0, "optimum": 7117.0}
+ic | VALID SOLUTION |  Execution time: 0.2393651008605957  |  Accuracy: 45.20162990023886 
+
+ic | Method: output/msl_knapPI_3_500_1000_1
+ic | Number of iterations: 20
+{"n": 500, "weight": 2517.0, "value": 3917.0, "capacity": 2517.0, "optimum": 7117.0}
+ic | VALID SOLUTION |  Execution time: 1.8949837684631348  |  Accuracy: 55.03723478993958 
+
+ic | Method: output/ils_knapPI_3_500_1000_1
+ic | Number of iterations: 20
+{"n": 500, "weight": 2517.0, "value": 5417.0, "capacity": 2517.0, "optimum": 7117.0}
+ic | VALID SOLUTION |  Execution time: 1.932858943939209  |  Accuracy: 76.1135309821554 
+
+ic | Method: output/ssl_knapPI_3_500_1000_1
+{"n": 500, "weight": 2517.0, "value": 3517.0, "capacity": 2517.0, "optimum": 7117.0}
+ic | VALID SOLUTION |  Execution time: 0.13463926315307617  |  Accuracy: 49.41688913868203 
+
+ic | Method: output/msl_knapPI_3_500_1000_1
+ic | Number of iterations: 20
+{"n": 500, "weight": 2517.0, "value": 3517.0, "capacity": 2517.0, "optimum": 7117.0}
+ic | VALID SOLUTION |  Execution time: 1.3229796886444092  |  Accuracy: 49.41688913868203 
+
+ic | Method: output/ils_knapPI_3_500_1000_1
+ic | Number of iterations: 20
+{"n": 500, "weight": 2517.0, "value": 5417.0, "capacity": 2517.0, "optimum": 7117.0}
+ic | VALID SOLUTION |  Execution time: 1.8801302909851074  |  Accuracy: 76.1135309821554 
+
+ic | Method: output/ssl_knapPI_1_500_1000_1
+{"n": 500, "weight": 2542.0, "value": 21419.0, "capacity": 2543.0, "optimum": 28857.0}
+ic | VALID SOLUTION |  Execution time: 1.2006990909576416  |  Accuracy: 74.22462487438057 
+
+ic | Method: output/ils_knapPI_1_500_1000_1
+ic | Number of iterations: 20
+{"n": 500, "weight": 2542.0, "value": 28568.0, "capacity": 2543.0, "optimum": 28857.0}
+ic | VALID SOLUTION |  Execution time: 4.533154010772705  |  Accuracy: 98.99850989361335 
+
+ic | Method: output/msl_knapPI_1_500_1000_1
+ic | Number of iterations: 20
+{"n": 500, "weight": 2543.0, "value": 23881.0, "capacity": 2543.0, "optimum": 28857.0}
+ic | VALID SOLUTION |  Execution time: 10.81006145477295  |  Accuracy: 82.75635027896178 
+
