@@ -1,6 +1,11 @@
 # Output files
-output/
+output/*
+!output/__init__.py
 evaluation_result_output.txt
+heuristics/methods/__pycache__/*
+heuristics/models/__pycache__/*
+methods/__pycache__/*
+models/__pycache__/*
 
 # VSCode
 .vscode/*

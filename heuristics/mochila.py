@@ -39,7 +39,7 @@ def single_start_local_search(optimum_value: float, instance_dict: dict, output_
         random_seed=10
     )
     solution.print_solution()
-    run_local_search2(
+    run_local_search(
         solution=solution,
         item_list=instance_dict.get('item_list'),
         distance=3,
