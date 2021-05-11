@@ -1,4 +1,5 @@
 import itertools
+from functools import reduce
 from copy import deepcopy
 from icecream import ic
 
@@ -6,13 +7,14 @@ from file_writer import FileWriter
 from models.solution import Solution
 from models.item import Item
 
-def kbits(n, k):
+def kbits(n, k):    
     result = []
     for bits in itertools.combinations(range(n), k):
         s = ['0'] * n
         for bit in bits:
             s[bit] = '1'
         result.append(''.join(s))
+    #print(f"D ====== {k} iterations {len(result)}")
     return result
 
 def parse_item_list_data(item_list: list):
@@ -27,6 +29,7 @@ def get_mask_list(n: int, distance: int, climb: bool = False) -> list:
             mask_list += kbits(n, i)
     else:
         mask_list += kbits(n, distance)
+    ic(len(mask_list))
     return mask_list
 
 def evaluate_neighborhood(solution: Solution, item_list: list, distance: int) -> bool:
@@ -36,6 +39,8 @@ def evaluate_neighborhood(solution: Solution, item_list: list, distance: int) ->
     pos2 = -1
     posd1 = -1
     has_improved = False
+
+    COUNTER = 0
 
     if distance == 1:
         for i in range(solution.n):
@@ -61,6 +66,7 @@ def evaluate_neighborhood(solution: Solution, item_list: list, distance: int) ->
     
     elif distance == 2:
         for i in range(solution.n):
+            COUNTER += 1
             if solution.item_list[i] == 0:
                 aux_weight = solution.weight + item_list[i].weight
                 aux_value = solution.value + item_list[i].value
@@ -68,12 +74,15 @@ def evaluate_neighborhood(solution: Solution, item_list: list, distance: int) ->
                 aux_weight = solution.weight - item_list[i].weight
                 aux_value = solution.value - item_list[i].value
             
-            #print(f"-- {aux_value} {aux_weight}")
+            print(f"{aux_value} {aux_weight}")
             
             if aux_weight <= solution.capacity and aux_value > optimum_value:
                 posd1 = i
                 optimum_value = aux_value
                 optimum_weight = aux_weight
+
+        #print(f"D = 1 iterations {COUNTER}")
+        COUNTER = 0
         
         if posd1 != -1:
             has_improved = True
@@ -89,6 +98,7 @@ def evaluate_neighborhood(solution: Solution, item_list: list, distance: int) ->
             #print(f"---- {aux_value} {aux_weight}")
             
             for j in range(i + 1, solution.n):
+                COUNTER += 1
                 if solution.item_list[j] == 0:
                     aux_weight2 = aux_weight + item_list[j].weight
                     aux_value2 = aux_value + item_list[j].value
@@ -96,7 +106,7 @@ def evaluate_neighborhood(solution: Solution, item_list: list, distance: int) ->
                     aux_weight2 = aux_weight - item_list[j].weight
                     aux_value2 = aux_value - item_list[j].value
 
-                #print(f"------ {aux_value} {aux_weight}")
+                print(f"{aux_value} {aux_weight}")
                 
                 if aux_weight2 <= solution.capacity and aux_value2 > optimum_value:
                     pos1 = i
@@ -117,30 +127,32 @@ def evaluate_neighborhood(solution: Solution, item_list: list, distance: int) ->
             solution.weight = optimum_weight
             return True
         
+        print(f"D = 2 iterations {COUNTER}")
+
         return False
 
     return False
 
-def evaluate_neighborhood2(solution: Solution, item_list: list, distance: int) -> bool:
-    (value_list, weight_list) = parse_item_list_data(item_list)
+def evaluate_neighborhood2(solution: Solution, item_list: list, distance: int, mask_list1, value_list1, weight_list1) -> bool:
     solution_binary = "".join([str(item) for item in solution.item_list])
     solution_number = int(solution_binary, 2)
-    mask_list = get_mask_list(solution.n, distance, climb=True)
-    #print(f"============== {len(mask_list)}")
+
+    mask_list = deepcopy(mask_list1)
     mask_list.reverse()
 
-    optimum_value = solution.optimum
     for mask in mask_list:
         masked_number = solution_number ^ int(mask, 2)
         masked_binary = bin(masked_number)[2:].zfill(solution.n)
+
         neighbor = [int(digit) for digit in masked_binary]
-        neighbor_weight_list = [a*b for a,b in zip(neighbor, weight_list)]
+        neighbor_weight_list = [a*b for a,b in zip(neighbor, weight_list1)]
+
         if sum(neighbor_weight_list) <= solution.capacity:
-            neighbor_value_list = [a*b for a,b in zip(neighbor, value_list)]
-            if sum(neighbor_value_list) > optimum_value:
-                solution.value = neighbor_value_list
-                solution.weight = neighbor_weight_list
-                solution.item_list = neighbor
+            neighbor_value_list = [a*b for a,b in zip(neighbor, value_list1)]
+            if sum(neighbor_value_list) > solution.value:
+                solution.value = sum(neighbor_value_list)
+                solution.weight =sum(neighbor_weight_list)
+                solution.item_list = deepcopy(neighbor)
                 return True
 
     return False
@@ -161,5 +173,7 @@ def run_local_search(solution: Solution, item_list: list, distance: int, output_
         output_file.write_line(f"{counter} {solution.value}")
 
 def run_local_search2(solution: Solution, item_list: list, distance: int, output_filename: str, counter: int = None):
-    while evaluate_neighborhood(solution, item_list, distance):
+    mask_list = get_mask_list(solution.n, distance, climb=True)
+    (value_list, weight_list) = parse_item_list_data(item_list)
+    while evaluate_neighborhood2(solution, item_list, distance, mask_list, value_list, weight_list):
          pass

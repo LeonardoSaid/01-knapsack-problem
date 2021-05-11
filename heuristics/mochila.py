@@ -39,10 +39,10 @@ def single_start_local_search(optimum_value: float, instance_dict: dict, output_
         random_seed=10
     )
     solution.print_solution()
-    run_local_search(
+    run_local_search2(
         solution=solution,
         item_list=instance_dict.get('item_list'),
-        distance=2,
+        distance=3,
         output_filename=output_filename
     )
     print(f"ic| Optimum Solution")
@@ -239,31 +239,31 @@ def evaluate_methods(optimum_value: float, instance_dict: dict, max_iterations: 
     process_list.append(ssl_process)
     ssl_process.start()
 
-    msl_process = Process(
-        target=evaluate_method,
-        kwargs=dict(
-            method_function=multi_start_local_search,
-            optimum_value=optimum_value,
-            instance_dict=instance_dict,
-            output_filename=f"output/msl_{output_filename}",
-            max_iterations=max_iterations
-        )
-    )
-    process_list.append(msl_process)
-    msl_process.start()
+    # msl_process = Process(
+    #     target=evaluate_method,
+    #     kwargs=dict(
+    #         method_function=multi_start_local_search,
+    #         optimum_value=optimum_value,
+    #         instance_dict=instance_dict,
+    #         output_filename=f"output/msl_{output_filename}",
+    #         max_iterations=max_iterations
+    #     )
+    # )
+    # process_list.append(msl_process)
+    # msl_process.start()
 
-    ils_process = Process(
-        target=evaluate_method,
-        kwargs=dict(
-            method_function=iterated_local_search,
-            optimum_value=optimum_value,
-            instance_dict=instance_dict,
-            output_filename=f"output/ils_{output_filename}",
-            max_iterations=max_iterations
-        )
-    )
-    process_list.append(ils_process)
-    ils_process.start()
+    # ils_process = Process(
+    #     target=evaluate_method,
+    #     kwargs=dict(
+    #         method_function=iterated_local_search,
+    #         optimum_value=optimum_value,
+    #         instance_dict=instance_dict,
+    #         output_filename=f"output/ils_{output_filename}",
+    #         max_iterations=max_iterations
+    #     )
+    # )
+    # process_list.append(ils_process)
+    # ils_process.start()
 
     # vns_process = Process(
     #     target=evaluate_method,
