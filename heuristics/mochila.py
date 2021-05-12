@@ -4,11 +4,14 @@ from multiprocessing import Process
 from copy import deepcopy
 from icecream import ic
 
+import settings
 from models.item import Item
 from models.solution import Solution
 from file_reader import FileReader
 from file_writer import FileWriter
-from methods.local_search import run_local_search, run_local_search2
+from methods.local_search import LocalSearch
+from methods.multi_start_local_search import MultiStartLocalSearch
+from methods.iterated_local_search import IteratedLocalSearch
 from methods.vns import VNS
 
 
@@ -35,26 +38,26 @@ def single_start_local_search(optimum_value: float, instance_dict: dict, output_
         optimum=optimum_value
     )
     solution.generate_starter_solution(
-        item_list=instance_dict.get('item_list'),
-        random_seed=10
+        item_list=instance_dict.get('item_list')
+        #random_seed=10
     )
     solution.print_solution()
-    run_local_search(
+
+    local_search = LocalSearch(
         solution=solution,
         item_list=instance_dict.get('item_list'),
-        distance=3,
-        output_filename=output_filename
+        distance=2,
+        output_filename=output_filename,
+        improved=True
     )
+    local_search.run()
+
     print(f"ic| Optimum Solution")
     solution.print_solution(item_list=instance_dict.get('item_list'))
     return solution
 
 def multi_start_local_search(optimum_value: float, instance_dict: dict, max_iterations: int, output_filename: str) -> Solution:
     best_solution = None
-    output_file = FileWriter(file_name=f"{output_filename}_temp")
-    output_file.write_line(output_filename.replace('TEMP-', ''))
-    output_file.write_line(str(optimum_value))
-    counter = 0
     for i in range(max_iterations):
         random_solution = Solution(
             n=instance_dict.get('n'),
@@ -63,49 +66,30 @@ def multi_start_local_search(optimum_value: float, instance_dict: dict, max_iter
         )
         random_solution.generate_starter_solution(
             item_list=instance_dict.get('item_list'),
-            random_seed=(10+i)
+            random_seed=(666+i)
         )
         random_solution.print_solution()
 
-        if counter == 0:
-            ic(f"{counter} {random_solution.value}")
-            output_file.write_line(f"{counter} {random_solution.value}")
-            counter += 1
+        if i == 0:
+            msl = MultiStartLocalSearch(
+                solution=random_solution,
+                item_list=instance_dict.get('item_list'),
+                distance=2,
+                output_filename=f"{output_filename}_temp"
+            )
+        else:
+            msl.solution = deepcopy(random_solution)
 
-        run_local_search2(
-            solution=random_solution,
-            item_list=instance_dict.get('item_list'),
-            distance=2,
-            output_filename=f"{output_filename}_temp"
-        )
+        msl.run()
 
-        if not best_solution or random_solution.value > best_solution.value:
-            best_solution = deepcopy(random_solution)
-        
-        ic(f"{counter} {best_solution.value}")
-        output_file.write_line(f"{counter} {best_solution.value}")
-        counter += 1
+        if best_solution is None or msl.solution.value > best_solution.value:
+            best_solution = deepcopy(msl.solution)
 
-    output_file.close_file()
-    FileWriter.rewrite_file(
-        file_to_read=f"{output_filename}_temp_output.txt",
-        file_to_write=f"{output_filename}_output.txt"
-    )
     print(f"ic| Optimum Solution")
     best_solution.print_solution(item_list=instance_dict.get('item_list'))
     return best_solution
 
-def iterated_local_search(optimum_value: float, instance_dict: dict, max_iterations: int, output_filename: str) -> Solution:
-
-    def check_acceptance_criteria(best_solution: Solution, candidate_solution: Solution) -> bool:
-        """
-            Aceite soluções melhores ou que sejam no máximo 10% pior da melhor solução atual.
-        """
-        if candidate_solution.value > best_solution.value or \
-                abs(1 - (candidate_solution.value / best_solution.value)) <= 0.1:
-            return True
-        return False
-    
+def iterated_local_search(optimum_value: float, instance_dict: dict, max_iterations: int, output_filename: str) -> Solution:    
     best_solution = Solution(
         n=instance_dict.get('n'),
         capacity=instance_dict.get('capacity'),
@@ -113,51 +97,31 @@ def iterated_local_search(optimum_value: float, instance_dict: dict, max_iterati
     )
     best_solution.generate_starter_solution(
         item_list=instance_dict.get('item_list'),
-        random_seed=10
+        random_seed=1234
     )
-    print(f"ic| Initial Optimum Solution (randomized)")
-    best_solution.print_solution()
-
-    # gravar a sol 0
-    output_file = FileWriter(file_name=f"{output_filename}_temp")
-    output_file.write_line(output_filename.replace('TEMP-', ''))
-    output_file.write_line(str(best_solution.optimum))
-    output_file.write_line(f"{0} {best_solution.value}")
-
-    counter = 1
 
     for i in range(max_iterations):
         perturbed_solution = deepcopy(best_solution)
         perturbed_solution.perturb_solution(item_list=instance_dict.get('item_list'))
-        run_local_search2(
-            solution=perturbed_solution,
-            item_list=instance_dict.get('item_list'),
-            distance=2,
-            output_filename=f"{output_filename}_temp"
-        )
 
-        while not check_acceptance_criteria(best_solution, perturbed_solution):
-            perturbed_solution.perturb_solution(item_list=instance_dict.get('item_list'))
-            run_local_search2(
+        if i == 0:
+            ils = IteratedLocalSearch(
                 solution=perturbed_solution,
                 item_list=instance_dict.get('item_list'),
                 distance=2,
                 output_filename=f"{output_filename}_temp"
             )
+        else:
+            ils.solution = deepcopy(perturbed_solution)
+        ils.run()
 
-        if perturbed_solution.value > best_solution.value:
-            best_solution = deepcopy(perturbed_solution)
+        while not ils.check_acceptance_criteria(best_solution):
+            ils.solution.perturb_solution(item_list=instance_dict.get('item_list'))
+            ils.run()
+
+        if ils.solution.value > best_solution.value:
+            best_solution = deepcopy(ils.solution)
             best_solution.print_solution()
-        
-        ic(f"{counter} {best_solution.value}")
-        output_file.write_line(f"{counter} {best_solution.value}")
-        counter += 1
-
-    output_file.close_file()
-    FileWriter.rewrite_file(
-        file_to_read=f"{output_filename}_temp_output.txt",
-        file_to_write=f"{output_filename}_output.txt"
-    )
 
     print(f"ic| Optimum Solution")
     best_solution.print_solution(item_list=instance_dict.get('item_list'))
@@ -185,6 +149,14 @@ def vns(optimum_value: float, instance_dict: dict, max_iterations: int, neighbor
     print(f"ic| Optimum Solution")
     solution.print_solution(item_list=instance_dict.get('item_list'))
     return solution
+
+def tabu_search():
+    #TO-DO tabu search
+    pass
+
+def simulated_annealing():
+    #TO-DO simulated annealing
+    pass
 
 def evaluate_method(**kwargs):
     start = time.time()
@@ -225,59 +197,65 @@ def evaluate_method(**kwargs):
     result_file.write_line(f"ic | {is_valid_str} SOLUTION |  Execution time: {end - start}  |  Accuracy: {accuracy} \n")
     result_file.close_file()
 
-def evaluate_methods(optimum_value: float, instance_dict: dict, max_iterations: int, neighborhood_size: int, output_filename: str):    
+def evaluate_methods(optimum_value: float, instance_dict: dict, output_filename: str):    
     process_list = []
-    ssl_process = Process(
-        target=evaluate_method,
-        kwargs=dict(
-            method_function=single_start_local_search,
-            optimum_value=optimum_value,
-            instance_dict=instance_dict,
-            output_filename=f"output/ssl_{output_filename}",
+    config = settings.EVALUATE_METHODS_SETTINGS
+    
+    if config.get('ssl', {}).get('enable'):
+        ssl_process = Process(
+            target=evaluate_method,
+            kwargs=dict(
+                method_function=single_start_local_search,
+                optimum_value=optimum_value,
+                instance_dict=instance_dict,
+                output_filename=f"output/ssl_{output_filename}",
+            )
         )
-    )
-    process_list.append(ssl_process)
-    ssl_process.start()
+        process_list.append(ssl_process)
+        ssl_process.start()
 
-    # msl_process = Process(
-    #     target=evaluate_method,
-    #     kwargs=dict(
-    #         method_function=multi_start_local_search,
-    #         optimum_value=optimum_value,
-    #         instance_dict=instance_dict,
-    #         output_filename=f"output/msl_{output_filename}",
-    #         max_iterations=max_iterations
-    #     )
-    # )
-    # process_list.append(msl_process)
-    # msl_process.start()
+    if config.get('msl', {}).get('enable'):
+        msl_process = Process(
+            target=evaluate_method,
+            kwargs=dict(
+                method_function=multi_start_local_search,
+                optimum_value=optimum_value,
+                instance_dict=instance_dict,
+                output_filename=f"output/msl_{output_filename}",
+                max_iterations=config.get('msl', {}).get('max_iterations')
+            )
+        )
+        process_list.append(msl_process)
+        msl_process.start()
 
-    # ils_process = Process(
-    #     target=evaluate_method,
-    #     kwargs=dict(
-    #         method_function=iterated_local_search,
-    #         optimum_value=optimum_value,
-    #         instance_dict=instance_dict,
-    #         output_filename=f"output/ils_{output_filename}",
-    #         max_iterations=max_iterations
-    #     )
-    # )
-    # process_list.append(ils_process)
-    # ils_process.start()
+    if config.get('ils', {}).get('enable'):
+        ils_process = Process(
+            target=evaluate_method,
+            kwargs=dict(
+                method_function=iterated_local_search,
+                optimum_value=optimum_value,
+                instance_dict=instance_dict,
+                output_filename=f"output/ils_{output_filename}",
+                max_iterations=config.get('ils', {}).get('enable')
+            )
+        )
+        process_list.append(ils_process)
+        ils_process.start()
 
-    # vns_process = Process(
-    #     target=evaluate_method,
-    #     kwargs=dict(
-    #         method_function=vns,
-    #         optimum_value=optimum_value,
-    #         instance_dict=instance_dict,
-    #         max_iterations=max_iterations,
-    #         neighborhood_size=neighborhood_size,
-    #         output_filename=f"output/vns_{output_filename}"
-    #     )
-    # )
-    # process_list.append(vns_process)
-    # vns_process.start()
+    if config.get('vns', {}).get('enable'):
+        vns_process = Process(
+            target=evaluate_method,
+            kwargs=dict(
+                method_function=vns,
+                optimum_value=optimum_value,
+                instance_dict=instance_dict,
+                max_iterations=config.get('ils', {}).get('max_iterations'),
+                neighborhood_size=config.get('ils', {}).get('neighborhood_size'),
+                output_filename=f"output/vns_{output_filename}"
+            )
+        )
+        process_list.append(vns_process)
+        vns_process.start()
 
     for process in process_list:
         process.join()
@@ -322,7 +300,7 @@ def main():
     optimum_value = solution_reader.parse_solution_data()
     instance_dict = instance_reader.parse_instance_data()
 
-    evaluate_methods(optimum_value, instance_dict, 20, 3, f"{file_names[int(instance_option)]}")
+    evaluate_methods(optimum_value, instance_dict, f"{file_names[int(instance_option)]}")
 
 if __name__ == "__main__":
     main()
