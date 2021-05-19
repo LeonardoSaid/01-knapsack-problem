@@ -1,9 +1,9 @@
-import itertools
 from copy import deepcopy
 from icecream import ic
 
 from file_writer import FileWriter
 from models.solution import Solution
+from utils.general import General
 
 class LocalSearch:
 
@@ -20,32 +20,6 @@ class LocalSearch:
         self.distance = distance
         self.output_filename = output_filename
         self.improved = improved
-
-    @staticmethod
-    def kbits(n, k) -> list:
-        result = []
-        for bits in itertools.combinations(range(n), k):
-            s = ['0'] * n
-            for bit in bits:
-                s[bit] = '1'
-            result.append(''.join(s))
-        return result
-
-    @staticmethod
-    def parse_item_list_data(item_list: list) -> tuple[list, list]:
-        value_list = [item.value for item in item_list]
-        weight_list = [item.weight for item in item_list]
-        return (value_list, weight_list)
-
-    @staticmethod
-    def get_mask_list(n: int, distance: int, climb: bool = False) -> list:
-        mask_list = []
-        if climb:
-            for i in range(1, distance + 1):
-                mask_list += LocalSearch.kbits(n, i)
-        else:
-            mask_list += LocalSearch.kbits(n, distance)
-        return mask_list
 
     def run(self):
         if self.improved:
@@ -191,8 +165,8 @@ class LocalSearch:
         output_file.write_line(str(self.solution.optimum))
         output_file.write_line(f"{counter} {self.solution.value}")
 
-        mask_list = LocalSearch.get_mask_list(self.solution.n, self.distance, climb=True)
-        (value_list, weight_list) = LocalSearch.parse_item_list_data(self.item_list)
+        mask_list = General.get_mask_list(self.solution.n, self.distance, climb=True)
+        (value_list, weight_list) = General.parse_item_list_data(self.item_list)
         while self.evaluate_neighborhood_improved(self.solution, mask_list, value_list, weight_list):
             counter += 1
             #self.solution.print_solution()

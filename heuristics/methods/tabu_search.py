@@ -4,7 +4,7 @@ from file_writer import FileWriter
 from models.solution import Solution
 from utils.general import General
 
-class MultiStartLocalSearch:
+class TabuSearch:
 
     def __init__(
         self,
@@ -21,7 +21,7 @@ class MultiStartLocalSearch:
         self.output_file = FileWriter(file_name=self.output_filename)
         self.counter = 0
 
-    def evaluate_neighborhood(self, solution: Solution, mask_list1, value_list1, weight_list1) -> bool:
+    def evaluate_neighborhood_tabu(self, solution: Solution, mask_list1, value_list1, weight_list1, tabu_list) -> bool:
         solution_binary = "".join([str(item) for item in solution.item_list])
         solution_number = int(solution_binary, 2)
 
@@ -29,9 +29,12 @@ class MultiStartLocalSearch:
         mask_list.reverse()
 
         for mask in mask_list:
+            # mask representa o movimento: quais bits serão flipados da solução
+            if int(mask, 2) in tabu_list.keys():
+                continue # sem considerar aspiration
+
             masked_number = solution_number ^ int(mask, 2)
             masked_binary = bin(masked_number)[2:].zfill(solution.n)
-
             neighbor = [int(digit) for digit in masked_binary]
             neighbor_weight_list = [a*b for a,b in zip(neighbor, weight_list1)]
 
@@ -45,8 +48,8 @@ class MultiStartLocalSearch:
 
         return False
 
-    def run(self):
-        #print(f"ic| Executing Multi Start Local Search with distance {self.distance}")
+    def run(self, tabu_list: list) -> None:
+        #print(f"ic| Executing Tabu Search with distance {self.distance}")
 
         if self.counter == 0:
             self.output_file.write_line(self.output_filename.replace('TEMP-', ''))
@@ -56,7 +59,8 @@ class MultiStartLocalSearch:
         mask_list = General.get_mask_list(self.solution.n, self.distance, climb=True)
         (value_list, weight_list) = General.parse_item_list_data(self.item_list)
 
-        while self.evaluate_neighborhood(self.solution, mask_list, value_list, weight_list):
+        teste = self.evaluate_neighborhood_tabu(self.solution, mask_list, value_list, weight_list, tabu_list)
+        if teste:
             self.counter += 1
             #self.solution.print_solution()
             #ic(f"{self.counter} {self.solution.value}")

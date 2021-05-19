@@ -34,6 +34,11 @@ class Solution:
     def generate_item_list(self, length: int) -> List[int]:
         return [0] * length
 
+    def clear_solution(self):
+        self.weight = 0
+        self.value = 0
+        self.item_list = self.generate_item_list(length=self.n)
+
     def is_valid(self, item_list: List[Item]) -> bool:
         """
             Verifies if all the selected items exist and the solution parameters are valid
@@ -80,10 +85,13 @@ class Solution:
                     counter += 1
             ic(f"{counter} items chosen")
     
-    def generate_starter_solution(self, item_list: List[Item], random_seed: int = None):
+    def generate_starter_solution(self, item_list: List[Item], random_seed: int = None, clear_solution: bool = False):
+        if clear_solution:
+            self.clear_solution()
+
         if random_seed:
             random.seed(random_seed)
-        
+
         counter = 0
         tracking_list = [0] * self.n
         while self.weight < self.capacity and counter < self.n:
@@ -106,19 +114,19 @@ class Solution:
 
         #counter = random.randint(1, self.item_list.count(1))
         counter = random.randint(1, 1 + int(self.item_list.count(1) * 0.25))
-        print(f"ic| Removing {counter} items in the solution")
+        #print(f"ic| Removing {counter} items in the solution")
         for i in range(counter):
             index = random.randint(0, 2147483647) % self.n
             while self.item_list[index] == 0:
                 index = (index + 1) % self.n
             self.remove_item(index, item_list[index])
 
-        print(f"ic| Attempting to add {counter} items in the solution")
+        #print(f"ic| Attempting to add {counter} items in the solution")
         tracking_list = [0] * self.n
         j = 0
         while j < counter:
             if tracking_list.count(1) == self.n:
-                print(f"ic| Unable to add anymore items")
+                #print(f"ic| Unable to add anymore items")
                 return
 
             index = random.randint(0, 2147483647) % self.n

@@ -1,9 +1,9 @@
 import itertools
 from copy import deepcopy
-from icecream import ic
 
 from file_writer import FileWriter
 from models.solution import Solution
+from utils.general import General
 
 class IteratedLocalSearch:
 
@@ -21,32 +21,6 @@ class IteratedLocalSearch:
         # writing output variables
         self.output_file = FileWriter(file_name=self.output_filename)
         self.counter = 0
-
-    @staticmethod
-    def kbits(n, k) -> list:
-        result = []
-        for bits in itertools.combinations(range(n), k):
-            s = ['0'] * n
-            for bit in bits:
-                s[bit] = '1'
-            result.append(''.join(s))
-        return result
-
-    @staticmethod
-    def parse_item_list_data(item_list: list) -> tuple[list, list]:
-        value_list = [item.value for item in item_list]
-        weight_list = [item.weight for item in item_list]
-        return (value_list, weight_list)
-
-    @staticmethod
-    def get_mask_list(n: int, distance: int, climb: bool = False) -> list:
-        mask_list = []
-        if climb:
-            for i in range(1, distance + 1):
-                mask_list += IteratedLocalSearch.kbits(n, i)
-        else:
-            mask_list += IteratedLocalSearch.kbits(n, distance)
-        return mask_list
 
     def check_acceptance_criteria(self, best_solution: Solution) -> bool:
         """
@@ -82,15 +56,15 @@ class IteratedLocalSearch:
         return False
 
     def run(self):
-        print(f"ic| Executing Iterated Local Search with distance {self.distance}")
+        #print(f"ic| Executing Iterated Local Search with distance {self.distance}")
 
         if self.counter == 0:
             self.output_file.write_line(self.output_filename.replace('TEMP-', ''))
             self.output_file.write_line(str(self.solution.optimum))
             self.output_file.write_line(f"{self.counter} {self.solution.value}")
 
-        mask_list = IteratedLocalSearch.get_mask_list(self.solution.n, self.distance, climb=True)
-        (value_list, weight_list) = IteratedLocalSearch.parse_item_list_data(self.item_list)
+        mask_list = General.get_mask_list(self.solution.n, self.distance, climb=True)
+        (value_list, weight_list) = General.parse_item_list_data(self.item_list)
 
         while self.evaluate_neighborhood(self.solution, mask_list, value_list, weight_list):
             self.counter += 1

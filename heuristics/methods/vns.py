@@ -7,7 +7,11 @@ from file_writer import FileWriter
 from models.solution import Solution
 from models.item import Item
 
-class VNS:
+"""
+    !!!!!!!!!! NOT WORKING !!!!!!!!!!
+"""
+
+class Vns:
     mask_list = None
 
     def __init__(
