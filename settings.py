@@ -11,8 +11,8 @@ EVALUATE_METHODS_SETTINGS = {
         'max_iterations': 5
     },
     'vns': {
-        'enable': False,
-        'max_iterations': 5,
+        'enable': True,
+        'max_iterations': 20,
         'neighborhood_size': 3
     },
     'tabu': {
@@ -21,7 +21,7 @@ EVALUATE_METHODS_SETTINGS = {
         'tenure': 4
     },
     'sa': {
-        'enable': True,
+        'enable': False,
         'max_iterations': 100,
         'initial_temperature': 90,
         'distance': 2

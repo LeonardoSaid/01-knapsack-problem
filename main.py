@@ -151,7 +151,11 @@ def vns(optimum_value: float, instance_dict: dict, output_filename: str) -> Solu
     )
     solution.print_solution()
 
-    vns_method = VNS(neighborhood_size)
+    vns_method = Vns(
+        item_list=instance_dict.get('item_list'),
+        neighborhood_size=neighborhood_size
+    )
+    
     vns_method.run_vns(
         solution=solution,
         item_list=instance_dict.get('item_list'),
