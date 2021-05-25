@@ -95,8 +95,8 @@ class Vns:
                 if best_neighbor and best_neighbor.value > solution.value:
                     counter += 1
                     solution = deepcopy(best_neighbor)
-                    solution.print_solution()
-                    ic(f"{counter} {solution.value}")
+                    #solution.print_solution()
+                    #ic(f"{counter} {solution.value}")
                     output_file.write_line(f"{counter} {solution.value}")
                 else:
                     k += 1

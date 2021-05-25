@@ -18,8 +18,12 @@ def parse_name(name: str):
         return "Busca Local Multistart"
     if "ils" in name:
         return "Busca Local Iterada"
-    if "VNS" in name:
+    if "vns" in name:
         return "Busca Vizinhança Variável"
+    if "sa" in name:
+        return "Recozimento Simulado"
+    if "tabu" in name:
+        return "Busca Tabu"
     return name
 
 try:

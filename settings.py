@@ -4,25 +4,25 @@ EVALUATE_METHODS_SETTINGS = {
     },
     'msl': {
         'enable': False,
-        'max_iterations': 5
+        'max_iterations': 50
     },
     'ils': {
         'enable': False,
-        'max_iterations': 5
+        'max_iterations': 50
     },
     'vns': {
-        'enable': True,
-        'max_iterations': 20,
+        'enable': False,
+        'max_iterations': 50,
         'neighborhood_size': 3
     },
     'tabu': {
         'enable': False,
-        'max_iterations': 5,
-        'tenure': 4
+        'max_iterations': 50,
+        'tenure': 5
     },
     'sa': {
         'enable': False,
-        'max_iterations': 100,
+        'max_iterations': 50,
         'initial_temperature': 90,
         'distance': 2
     }

@@ -16,7 +16,7 @@ class FileReader:
     
     @staticmethod
     def get_file_names(path: str):
-        ic(path)
+        #ic(path)
         file_names = [f for f in listdir(path) if isfile(join(path, f))]
         return file_names
 
@@ -29,7 +29,7 @@ class FileReader:
     def parse_instance_data(self) -> dict:
         file = open(f"{self.path}/{self.file_name}", "r")
         n, capacity = file.readline().split()
-        ic((n, capacity))
+        #ic((n, capacity))
         item_list = list()
         for i in range(int(n)):
             value, weight = file.readline().split()
@@ -44,5 +44,5 @@ class FileReader:
     def parse_solution_data(self) -> float:
         file = open(f"{self.path}/{self.file_name}", "r")
         optimum = float(file.readline())
-        ic(optimum)
+        #ic(optimum)
         return optimum

@@ -76,14 +76,14 @@ class Solution:
         self.value -= item.value
 
     def print_solution(self, item_list: list = None):
-        ic(self.to_dict())
+        print(self.to_dict())
         if item_list:
             counter = 0
             for i in range(self.n):
                 if self.item_list[i] == 1:
                     #ic(item_list[i].__dict__)
                     counter += 1
-            ic(f"{counter} items chosen")
+            #print(f"{counter} items chosen")
     
     def generate_starter_solution(self, item_list: List[Item], random_seed: int = None, clear_solution: bool = False):
         if clear_solution:

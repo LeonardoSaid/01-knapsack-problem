@@ -55,19 +55,18 @@ class IteratedLocalSearch:
 
         return False
 
-    def run(self):
+    def run(self, counter):
         #print(f"ic| Executing Iterated Local Search with distance {self.distance}")
 
-        if self.counter == 0:
+        if counter == 0:
             self.output_file.write_line(self.output_filename.replace('TEMP-', ''))
             self.output_file.write_line(str(self.solution.optimum))
-            self.output_file.write_line(f"{self.counter} {self.solution.value}")
+            self.output_file.write_line(f"{counter} {self.solution.value}")
 
         mask_list = General.get_mask_list(self.solution.n, self.distance, climb=True)
         (value_list, weight_list) = General.parse_item_list_data(self.item_list)
 
         while self.evaluate_neighborhood(self.solution, mask_list, value_list, weight_list):
-            self.counter += 1
             #self.solution.print_solution()
             #ic(f"{self.counter} {self.solution.value}")
-            self.output_file.write_line(f"{self.counter} {self.solution.value}")
+            pass

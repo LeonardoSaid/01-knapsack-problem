@@ -126,8 +126,8 @@ class LocalSearch:
         
         while self.evaluate_neighborhood(self.solution, self.item_list, self.distance):
             counter += 1
-            self.solution.print_solution()
-            ic(f"{counter} {self.solution.value}")
+            #self.solution.print_solution()
+            #ic(f"{counter} {self.solution.value}")
             output_file.write_line(f"{counter} {self.solution.value}")
 
     # improved method

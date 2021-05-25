@@ -27,6 +27,9 @@ INSTANCE_OPTIONS_SOLUTION_FOLDER_NAMES = {
     "2": "instances_01_KP/low-dimensional-optimum"
 }
 
+# Random seed for initial solution
+RANDOM_SEED = 1234
+
 
 def validate_instance_option(option: str, options: list):
     try:
@@ -41,10 +44,10 @@ def single_start_local_search(optimum_value: float, instance_dict: dict, output_
         optimum=optimum_value
     )
     solution.generate_starter_solution(
-        item_list=instance_dict.get('item_list')
-        #random_seed=10
+        item_list=instance_dict.get('item_list'),
+        random_seed=RANDOM_SEED
     )
-    solution.print_solution()
+    #solution.print_solution()
 
     local_search = LocalSearch(
         solution=solution,
@@ -55,7 +58,7 @@ def single_start_local_search(optimum_value: float, instance_dict: dict, output_
     )
     local_search.run()
 
-    print(f"ic| Optimum Solution")
+    print(f"ic| SSL Optimum Solution")
     solution.print_solution(item_list=instance_dict.get('item_list'))
     return solution
 
@@ -64,6 +67,9 @@ def multi_start_local_search(optimum_value: float, instance_dict: dict, output_f
     max_iterations = config.get('msl', {}).get('max_iterations')
     
     best_solution = None
+    counter = 0
+    msl = None
+
     for i in range(max_iterations):
         random_solution = Solution(
             n=instance_dict.get('n'),
@@ -72,9 +78,9 @@ def multi_start_local_search(optimum_value: float, instance_dict: dict, output_f
         )
         random_solution.generate_starter_solution(
             item_list=instance_dict.get('item_list'),
-            random_seed=(666+i)
+            random_seed=(RANDOM_SEED+i)
         )
-        random_solution.print_solution()
+        #random_solution.print_solution()
 
         if i == 0:
             msl = MultiStartLocalSearch(
@@ -86,12 +92,14 @@ def multi_start_local_search(optimum_value: float, instance_dict: dict, output_f
         else:
             msl.solution = deepcopy(random_solution)
 
-        msl.run()
+        msl.run(counter=counter)
 
         if best_solution is None or msl.solution.value > best_solution.value:
+            counter += 1
+            msl.output_file.write_line(f"{counter} {msl.solution.value}")
             best_solution = deepcopy(msl.solution)
 
-    print(f"ic| Optimum Solution")
+    print(f"ic| MSL Optimum Solution")
     best_solution.print_solution(item_list=instance_dict.get('item_list'))
     return best_solution
 
@@ -106,8 +114,10 @@ def iterated_local_search(optimum_value: float, instance_dict: dict, output_file
     )
     best_solution.generate_starter_solution(
         item_list=instance_dict.get('item_list'),
-        random_seed=1234
+        random_seed=RANDOM_SEED
     )
+
+    counter = 0
 
     for i in range(max_iterations):
         perturbed_solution = deepcopy(best_solution)
@@ -122,17 +132,20 @@ def iterated_local_search(optimum_value: float, instance_dict: dict, output_file
             )
         else:
             ils.solution = deepcopy(perturbed_solution)
-        ils.run()
+
+        ils.run(counter)
 
         while not ils.check_acceptance_criteria(best_solution):
             ils.solution.perturb_solution(item_list=instance_dict.get('item_list'))
-            ils.run()
+            ils.run(counter)
 
         if ils.solution.value > best_solution.value:
+            counter += 1
             best_solution = deepcopy(ils.solution)
             best_solution.print_solution()
+            ils.output_file.write_line(f"{counter} {ils.solution.value}")
 
-    print(f"ic| Optimum Solution")
+    print(f"ic| ILS Optimum Solution")
     best_solution.print_solution(item_list=instance_dict.get('item_list'))
     return best_solution
 
@@ -147,9 +160,10 @@ def vns(optimum_value: float, instance_dict: dict, output_filename: str) -> Solu
         optimum=optimum_value
     )
     solution.generate_starter_solution(
-        item_list=instance_dict.get('item_list')
+        item_list=instance_dict.get('item_list'),
+        random_seed=RANDOM_SEED
     )
-    solution.print_solution()
+    #solution.print_solution()
 
     vns_method = Vns(
         item_list=instance_dict.get('item_list'),
@@ -163,7 +177,7 @@ def vns(optimum_value: float, instance_dict: dict, output_filename: str) -> Solu
         neighborhood_size=neighborhood_size,
         output_filename=output_filename
     )
-    print(f"ic| Optimum Solution")
+    print(f"ic| VNS Optimum Solution")
     solution.print_solution(item_list=instance_dict.get('item_list'))
     return solution
 
@@ -177,7 +191,8 @@ def tabu_search(optimum_value: float, instance_dict: dict, output_filename: str)
         optimum=optimum_value
     )
     best_solution.generate_starter_solution(
-        item_list=instance_dict.get('item_list')
+        item_list=instance_dict.get('item_list'),
+        random_seed=RANDOM_SEED
     )
     best_solution.print_solution()
 
@@ -206,7 +221,7 @@ def tabu_search(optimum_value: float, instance_dict: dict, output_filename: str)
         number = int(''.join([str(x) for x in tabu_search.solution.item_list]), 2)
         tabu_list[number] = tabu_tenure
 
-    print(f"ic| Optimum Solution")
+    print(f"ic| Tabu Optimum Solution")
     best_solution.print_solution(item_list=instance_dict.get('item_list'))
     return best_solution
 
@@ -223,7 +238,7 @@ def simulated_annealing(optimum_value: float, instance_dict: dict, output_filena
     )
     best_solution.generate_starter_solution(
         item_list=instance_dict.get('item_list'),
-        random_seed=10
+        random_seed=RANDOM_SEED
     )
     best_solution.print_solution()
 
@@ -250,20 +265,20 @@ def simulated_annealing(optimum_value: float, instance_dict: dict, output_filena
         test = sa.random_neighbor(distance=distance)
 
         if not test:
-            print(f"!!!!!!!!!!!!!!! DEU RUIM !!!!!!!!!!!")
+            print(f"ERROR ! Could not find a random neighbor")
 
-        # se for melhor seta como best_solution
+        # if better set as best_solution
         if sa.solution.value > best_solution.value:
             best_solution = deepcopy(sa.solution)
             writer.write_line(f"{i} {best_solution.value}")
-        # calcula diff de valor
+        # calculate diff
         diff = current_solution.value - sa.solution.value
-        # calcula temp
+        # calculate temp
         t = initial_temperature / float(i + 1)
         if diff < 0 or random() < exp(-diff / t):
             current_solution = deepcopy(sa.solution)
 
-    print(f"ic| Optimum Solution")
+    print(f"ic| SA Optimum Solution")
     best_solution.print_solution(item_list=instance_dict.get('item_list'))
     return best_solution
 
