@@ -55,5 +55,10 @@ class MultiStartLocalSearch:
         mask_list = General.get_mask_list(self.solution.n, self.distance, climb=True)
         (value_list, weight_list) = General.parse_item_list_data(self.item_list)
 
+        counter_stop = 0
+
         while self.evaluate_neighborhood(self.solution, mask_list, value_list, weight_list):
-            pass
+            counter_stop += 1
+            # prevent from looping indefinitely
+            if counter_stop >= 100:
+                return

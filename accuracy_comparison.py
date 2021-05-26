@@ -4,6 +4,8 @@ from multiprocessing import Process
 from copy import deepcopy
 from math import exp
 from random import random
+import os
+import json
 
 import settings
 from models.solution import Solution
@@ -29,7 +31,6 @@ INSTANCE_OPTIONS_SOLUTION_FOLDER_NAMES = {
 
 # Random seed for initial solution
 RANDOM_SEED = 1234
-
 
 def validate_instance_option(option: str, options: list):
     try:
@@ -71,9 +72,6 @@ def multi_start_local_search(optimum_value: float, instance_dict: dict, output_f
     msl = None
 
     for i in range(max_iterations):
-
-        print(f"Iteration {i}")
-
         random_solution = Solution(
             n=instance_dict.get('n'),
             capacity=instance_dict.get('capacity'),
@@ -125,8 +123,6 @@ def iterated_local_search(optimum_value: float, instance_dict: dict, output_file
     for i in range(max_iterations):
         perturbed_solution = deepcopy(best_solution)
         perturbed_solution.perturb_solution(item_list=instance_dict.get('item_list'))
-
-        print(f"Iteration {i}")
 
         if i == 0:
             ils = IteratedLocalSearch(
@@ -211,8 +207,7 @@ def tabu_search(optimum_value: float, instance_dict: dict, output_filename: str)
         output_filename=f"{output_filename}_temp"
     )
 
-    for i in range(max_iterations):
-
+    for _ in range(max_iterations):
         tabu_search.run(tabu_list=tabu_list)
         if tabu_search.solution.value > best_solution.value:
             best_solution = deepcopy(tabu_search.solution)
@@ -275,9 +270,8 @@ def simulated_annealing(optimum_value: float, instance_dict: dict, output_filena
 
         # if better set as best_solution
         if sa.solution.value > best_solution.value:
-            sa.counter += 1
             best_solution = deepcopy(sa.solution)
-            writer.write_line(f"{sa.counter} {best_solution.value}")
+            writer.write_line(f"{i} {best_solution.value}")
         # calculate diff
         diff = current_solution.value - sa.solution.value
         # calculate temp
@@ -406,40 +400,66 @@ def evaluate_methods(optimum_value: float, instance_dict: dict, output_filename:
     for process in process_list:
         process.join()
 
+# for each instance append the optimum to dict
 def main():
-    print("Selecione o tipo de instância:")
-    print("1 - Large Scale")
-    print("2 - Low Dimensional")
-    instance_type_option = input()
+    directory = os.fsencode("instances_01_KP/large_scale-optimum")
+    foo = {'knapPI_1_100_1000_1': {'ssl': 8759.0, 'msl': 9147.0, 'ils': 9147.0, 'vns': 2842.0, 'tabu': 8759.0, 'sa': 7486.0}, 'knapPI_1_200_1000_1': {'ssl': 9245.0, 'msl': 11013.0, 'ils': 11238.0, 'vns': 3941.0, 'tabu': 9245.0, 'sa': 9213.0}, 'knapPI_1_500_1000_1': {'ssl': 23770.0, 'msl': 23813.0, 'ils': 26385.0, 'vns': 6735.0, 'tabu': 23770.0, 'sa': 18496.0}, 'knapPI_2_100_1000_1': {'ssl': 1275.0, 'msl': 1497.0, 'ils': 1514.0, 'vns': 1023.0, 'tabu': 1275.0, 'sa': 1160.0}, 'knapPI_2_200_1000_1': {'ssl': 1286.0, 'msl': 1474.0, 'ils': 1623.0, 'vns': 756.0, 'tabu': 1286.0, 'sa': 1319.0}, 'knapPI_2_500_1000_1': {'ssl': 3468.0, 'msl': 3468.0, 'ils': 3527.0, 'vns': 2695.0, 'tabu': 3468.0, 'sa': 3139.0}, 'knapPI_3_100_1000_1': {'ssl': 1296.0, 'msl': 1997.0, 'ils': 2195.0, 'vns': 1294.0, 'tabu': 1296.0, 'sa': 1296.0}, 'knapPI_3_200_1000_1': {'ssl': 1595.0, 'msl': 1897.0, 'ils': 2197.0, 'vns': 1594.0, 'tabu': 1595.0, 'sa': 1796.0}, 'knapPI_3_500_1000_1': {'ssl': 3217.0, 'msl': 3517.0, 'ils': 3417.0, 'vns': 3215.0, 'tabu': 3217.0, 'sa': 3416.0}}
+    for file in os.listdir(directory):
+        value = 0
+        with open(f'instances_01_KP/large_scale-optimum/{os.fsdecode(file)}') as f:
+            value = float(f.readline())
+        foo[os.fsdecode(file)]["optimum"] = value
+    print(foo)
 
-    while (instance_type_option not in VALID_INSTANCE_OPTIONS):
-        print("Opção inválida, digite outra")
-        instance_type_option = input()
+# extract the best value found and returns a json
+def main2():
+    directory = os.fsencode("output")
+    output_list = []
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        if filename.endswith(".txt"):
+            output_list.append(filename)
 
+    foo = {}
+    directory = os.fsencode("instances_01_KP/large_scale")
+    for file in os.listdir(directory):
+        foo[os.fsdecode(file)] = {"ssl": 0, "msl": 0, "ils": 0, "vns": 0, "tabu": 0, "sa": 0}
+
+    for output in output_list:
+        value = 0
+        with open(f'output/{output}') as f:
+            for line in f:
+                pass
+            _, value = line.split()
+        value = float(value)
+        for key in foo.keys():
+            if key in output:
+                for alg in foo[key]:
+                    if alg in output:
+                        foo[key][alg] = value
+    
+    print(foo)
+
+# generate output files
+def main2():
+    # 1 or 2
+    instance_type_option = "1"
     file_names = FileReader.get_file_names(path=INSTANCE_OPTIONS_FOLDER_NAMES.get(instance_type_option))
 
     for file_name in file_names:
-            print(f"{file_names.index(file_name)} - {file_name}")
+        instance_option = file_names.index(file_name)
+        instance_reader = FileReader(
+            path=INSTANCE_OPTIONS_FOLDER_NAMES.get(instance_type_option),
+            file_name=file_names[int(instance_option)]
+        )
+        solution_reader = FileReader(
+            path=INSTANCE_OPTIONS_SOLUTION_FOLDER_NAMES.get(instance_type_option),
+            file_name=file_names[int(instance_option)]
+        )
 
-    print("Selecione uma instância:")
-
-    instance_option = input()
-    while not validate_instance_option(instance_option, file_names):
-        print("Opção inválida, digite outra")
-        instance_option = input()
-
-    instance_reader = FileReader(
-        path=INSTANCE_OPTIONS_FOLDER_NAMES.get(instance_type_option),
-        file_name=file_names[int(instance_option)]
-    )
-    solution_reader = FileReader(
-        path=INSTANCE_OPTIONS_SOLUTION_FOLDER_NAMES.get(instance_type_option),
-        file_name=file_names[int(instance_option)]
-    )
-
-    optimum_value = solution_reader.parse_solution_data()
-    instance_dict = instance_reader.parse_instance_data()
-    evaluate_methods(optimum_value, instance_dict, f"{file_names[int(instance_option)]}")
+        optimum_value = solution_reader.parse_solution_data()
+        instance_dict = instance_reader.parse_instance_data()
+        evaluate_methods(optimum_value, instance_dict, f"{file_names[int(instance_option)]}")
 
 if __name__ == "__main__":
     main()

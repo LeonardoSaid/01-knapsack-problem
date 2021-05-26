@@ -170,5 +170,9 @@ class LocalSearch:
         while self.evaluate_neighborhood_improved(self.solution, mask_list, value_list, weight_list):
             counter += 1
             #self.solution.print_solution()
-            #ic(f"{counter} {self.solution.value}")
+            ic(f"{counter} {self.solution.value}")
             output_file.write_line(f"{counter} {self.solution.value}")
+
+            # prevent looping indefinitely
+            if counter >= 100:
+                return
